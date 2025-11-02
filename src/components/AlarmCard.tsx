@@ -2,7 +2,7 @@ import { Clock, Zap, Sun, Repeat } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Alarm, REPEAT_LABELS } from "@/lib/types";
+import { Alarm, REPEAT_LABELS, WEEKDAY_LABELS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface AlarmCardProps {
@@ -12,6 +12,13 @@ interface AlarmCardProps {
 }
 
 export const AlarmCard = ({ alarm, onToggle, onClick }: AlarmCardProps) => {
+  const getRepeatDisplay = () => {
+    if (alarm.repeat === 'custom' && alarm.selectedDays && alarm.selectedDays.length > 0) {
+      return alarm.selectedDays.map(day => WEEKDAY_LABELS[day]).join(', ');
+    }
+    return REPEAT_LABELS[alarm.repeat];
+  };
+
   return (
     <Card
       className={cn(
@@ -34,7 +41,7 @@ export const AlarmCard = ({ alarm, onToggle, onClick }: AlarmCardProps) => {
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary" className="flex items-center gap-1">
               <Repeat className="w-3 h-3" />
-              {REPEAT_LABELS[alarm.repeat]}
+              {getRepeatDisplay()}
             </Badge>
             
             {alarm.flashMode !== 'off' && (

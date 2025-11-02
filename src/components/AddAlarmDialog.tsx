@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alarm, RepeatType, FlashMode, REPEAT_LABELS, FLASH_INTERVALS } from "@/lib/types";
+import { Alarm, RepeatType, FlashMode, REPEAT_LABELS, FLASH_INTERVALS, WEEKDAY_LABELS } from "@/lib/types";
 import { Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AddAlarmDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ export const AddAlarmDialog = ({ open, onOpenChange, alarm, onSave, isPro }: Add
       flashInterval: 5,
       screenLight: true,
       label: '',
+      selectedDays: [],
     }
   );
 
@@ -41,9 +43,18 @@ export const AddAlarmDialog = ({ open, onOpenChange, alarm, onSave, isPro }: Add
       flashInterval: formData.flashInterval,
       screenLight: formData.screenLight ?? false,
       label: formData.label,
+      selectedDays: formData.selectedDays,
     };
     onSave(newAlarm);
     onOpenChange(false);
+  };
+
+  const toggleDay = (day: number) => {
+    const currentDays = formData.selectedDays || [];
+    const newDays = currentDays.includes(day)
+      ? currentDays.filter(d => d !== day)
+      : [...currentDays, day].sort();
+    setFormData({ ...formData, selectedDays: newDays });
   };
 
   const handleFlashModeChange = (mode: FlashMode) => {
@@ -104,6 +115,31 @@ export const AddAlarmDialog = ({ open, onOpenChange, alarm, onSave, isPro }: Add
               </SelectContent>
             </Select>
           </div>
+
+          {formData.repeat === 'custom' && (
+            <div>
+              <Label>Günler</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {Object.entries(WEEKDAY_LABELS).map(([day, label]) => {
+                  const dayNum = parseInt(day);
+                  const isSelected = (formData.selectedDays || []).includes(dayNum);
+                  return (
+                    <div
+                      key={day}
+                      onClick={() => toggleDay(dayNum)}
+                      className={`flex items-center justify-center w-12 h-12 rounded-full cursor-pointer transition-all ${
+                        isSelected
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                      }`}
+                    >
+                      <span className="text-sm font-medium">{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="flashMode">Flaş Modu</Label>

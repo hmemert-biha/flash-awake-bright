@@ -11,7 +11,7 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
   }
 };
 
-const getRepeatSchedule = (repeat: RepeatType, time: string) => {
+const getRepeatSchedule = (repeat: RepeatType, time: string, selectedDays?: number[]) => {
   const [hours, minutes] = time.split(':').map(Number);
   
   switch (repeat) {
@@ -21,6 +21,11 @@ const getRepeatSchedule = (repeat: RepeatType, time: string) => {
       return { on: { weekday: [2, 3, 4, 5, 6] }, hour: hours, minute: minutes };
     case 'weekends':
       return { on: { weekday: [1, 7] }, hour: hours, minute: minutes };
+    case 'custom':
+      if (selectedDays && selectedDays.length > 0) {
+        return { on: { weekday: selectedDays }, hour: hours, minute: minutes };
+      }
+      return undefined;
     default:
       return undefined;
   }
@@ -38,7 +43,7 @@ export const scheduleAlarm = async (alarm: Alarm): Promise<void> => {
     }
 
     const schedule = alarm.repeat !== 'once' 
-      ? getRepeatSchedule(alarm.repeat, alarm.time)
+      ? getRepeatSchedule(alarm.repeat, alarm.time, alarm.selectedDays)
       : { at: alarmTime };
 
     await LocalNotifications.schedule({
